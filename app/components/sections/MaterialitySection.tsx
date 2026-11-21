@@ -1,11 +1,11 @@
 "use client";
 
-import React, { useEffect, useRef, memo } from "react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
+import React, { memo } from "react";
+import { useInView } from "../../hooks/useInView";
 
 function MaterialitySectionComponent() {
-  const sectionRef = useRef<HTMLElement | null>(null);
+  const [headerRef, headerInView] = useInView<HTMLDivElement>({ threshold: 0.15 });
+  const [gridRef, gridInView] = useInView<HTMLDivElement>({ threshold: 0.08 });
 
   const materials = [
     {
@@ -46,51 +46,21 @@ function MaterialitySectionComponent() {
     },
   ];
 
-  useEffect(() => {
-    gsap.registerPlugin(ScrollTrigger);
-
-    const ctx = gsap.context(() => {
-      // Header Elements Reveal
-      gsap.from(".mat-header > *", {
-        scrollTrigger: {
-          trigger: ".mat-header",
-          start: "top 85%",
-          toggleActions: "play none none none",
-        },
-        y: 40,
-        opacity: 0,
-        duration: 1.0,
-        stagger: 0.15,
-        ease: "power3.out",
-      });
-
-      // 4 Materials Cards Staggered Reveal
-      gsap.from(".mat-card", {
-        scrollTrigger: {
-          trigger: ".mat-grid",
-          start: "top 85%",
-          toggleActions: "play none none none",
-        },
-        y: 50,
-        opacity: 0,
-        duration: 1.1,
-        stagger: 0.16,
-        ease: "power3.out",
-      });
-    }, sectionRef);
-
-    return () => ctx.revert();
-  }, []);
-
   return (
     <section
       id="materiality"
-      ref={sectionRef}
       className="relative z-10 bg-zinc-950 px-6 sm:px-12 md:px-20 lg:px-28 py-32 sm:py-44 border-t border-zinc-900 overflow-hidden"
     >
       <div className="max-w-6xl mx-auto space-y-24">
         {/* Section Header */}
-        <div className="mat-header space-y-6 max-w-3xl">
+        <div
+          ref={headerRef}
+          className={`space-y-6 max-w-3xl transition-all duration-1000 ease-out ${
+            headerInView
+              ? "opacity-100 translate-y-0"
+              : "opacity-0 translate-y-10"
+          }`}
+        >
           <div className="flex items-center gap-3">
             <span className="w-2 h-2 rounded-full bg-white/60 animate-pulse" />
             <span className="font-mono text-xs text-zinc-400 uppercase tracking-[0.3em]">
@@ -110,11 +80,19 @@ function MaterialitySectionComponent() {
         </div>
 
         {/* 4 Materials Detailed Grid */}
-        <div className="mat-grid grid grid-cols-1 md:grid-cols-2 gap-8">
-          {materials.map((mat) => (
+        <div
+          ref={gridRef}
+          className="grid grid-cols-1 md:grid-cols-2 gap-8"
+        >
+          {materials.map((mat, idx) => (
             <div
               key={mat.number}
-              className="mat-card p-8 sm:p-11 rounded-3xl bg-zinc-900/30 border border-zinc-800/80 hover:border-white/30 hover:-translate-y-2 transition-all duration-500 flex flex-col justify-between space-y-8 shadow-[0_15px_40px_rgba(0,0,0,0.4)]"
+              className={`p-8 sm:p-11 rounded-3xl bg-zinc-900/30 border border-zinc-800/80 hover:border-white/30 hover:-translate-y-2 transition-all duration-700 ease-out flex flex-col justify-between space-y-8 shadow-[0_15px_40px_rgba(0,0,0,0.4)] ${
+                gridInView
+                  ? "opacity-100 translate-y-0"
+                  : "opacity-0 translate-y-12"
+              }`}
+              style={{ transitionDelay: `${idx * 120}ms` }}
             >
               <div className="space-y-5">
                 <div className="flex items-center justify-between border-b border-zinc-800/70 pb-4">

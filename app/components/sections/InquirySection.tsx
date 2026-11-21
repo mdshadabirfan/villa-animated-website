@@ -1,11 +1,13 @@
 "use client";
 
-import React, { useState, useEffect, useRef, memo } from "react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
+import React, { useState, memo } from "react";
+import { useInView } from "../../hooks/useInView";
 
 function InquirySectionComponent() {
-  const sectionRef = useRef<HTMLElement | null>(null);
+  const [headerRef, headerInView] = useInView<HTMLDivElement>({ threshold: 0.15 });
+  const [formRef, formInView] = useInView<HTMLDivElement>({ threshold: 0.1 });
+  const [advisoryRef, advisoryInView] = useInView<HTMLDivElement>({ threshold: 0.1 });
+
   const [submitted, setSubmitted] = useState<boolean>(false);
   const [formData, setFormData] = useState({
     fullName: "",
@@ -16,55 +18,6 @@ function InquirySectionComponent() {
     message: "",
   });
 
-  useEffect(() => {
-    gsap.registerPlugin(ScrollTrigger);
-
-    const ctx = gsap.context(() => {
-      // Header Reveal
-      gsap.from(".inq-header > *", {
-        scrollTrigger: {
-          trigger: ".inq-header",
-          start: "top 85%",
-          toggleActions: "play none none none",
-        },
-        y: 40,
-        opacity: 0,
-        duration: 1.0,
-        stagger: 0.15,
-        ease: "power3.out",
-      });
-
-      // Left Form Container Reveal
-      gsap.from(".inq-form-container", {
-        scrollTrigger: {
-          trigger: ".inq-columns-container",
-          start: "top 85%",
-          toggleActions: "play none none none",
-        },
-        y: 45,
-        opacity: 0,
-        duration: 1.1,
-        ease: "power3.out",
-      });
-
-      // Right Advisory Cards Reveal
-      gsap.from(".inq-advisory-card", {
-        scrollTrigger: {
-          trigger: ".inq-columns-container",
-          start: "top 85%",
-          toggleActions: "play none none none",
-        },
-        y: 45,
-        opacity: 0,
-        duration: 1.1,
-        stagger: 0.16,
-        ease: "power3.out",
-      });
-    }, sectionRef);
-
-    return () => ctx.revert();
-  }, []);
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitted(true);
@@ -73,12 +26,18 @@ function InquirySectionComponent() {
   return (
     <section
       id="inquire"
-      ref={sectionRef}
       className="relative z-10 bg-zinc-950 px-6 sm:px-12 md:px-20 lg:px-28 py-32 sm:py-44 border-t border-zinc-900 overflow-hidden"
     >
       <div className="max-w-6xl mx-auto space-y-24">
         {/* Section Header */}
-        <div className="inq-header space-y-6 max-w-3xl">
+        <div
+          ref={headerRef}
+          className={`space-y-6 max-w-3xl transition-all duration-1000 ease-out ${
+            headerInView
+              ? "opacity-100 translate-y-0"
+              : "opacity-0 translate-y-10"
+          }`}
+        >
           <div className="flex items-center gap-3">
             <span className="w-2 h-2 rounded-full bg-white/60 animate-pulse" />
             <span className="font-mono text-xs text-zinc-400 uppercase tracking-[0.3em]">
@@ -99,9 +58,16 @@ function InquirySectionComponent() {
         </div>
 
         {/* 2-Column: Form & Advisory Details */}
-        <div className="inq-columns-container grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-start">
           {/* Left Column: Interactive Form */}
-          <div className="inq-form-container lg:col-span-7 p-8 sm:p-12 rounded-3xl bg-zinc-900/40 border border-zinc-800/80 backdrop-blur-xl shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
+          <div
+            ref={formRef}
+            className={`lg:col-span-7 p-8 sm:p-12 rounded-3xl bg-zinc-900/40 border border-zinc-800/80 backdrop-blur-xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] transition-all duration-1000 ease-out ${
+              formInView
+                ? "opacity-100 translate-y-0 scale-100"
+                : "opacity-0 translate-y-12 scale-[0.98]"
+            }`}
+          >
             {submitted ? (
               <div className="py-16 text-center space-y-5">
                 <div className="w-12 h-12 rounded-full bg-white/10 border border-white/20 flex items-center justify-center mx-auto text-white">
@@ -277,8 +243,17 @@ function InquirySectionComponent() {
           </div>
 
           {/* Right Column: Advisory Details */}
-          <div className="lg:col-span-5 space-y-8">
-            <div className="inq-advisory-card p-8 rounded-3xl bg-zinc-900/20 border border-zinc-800/60 hover:border-white/30 hover:-translate-y-1.5 transition-all duration-500 space-y-6 shadow-[0_15px_40px_rgba(0,0,0,0.3)]">
+          <div
+            ref={advisoryRef}
+            className="lg:col-span-5 space-y-8"
+          >
+            <div
+              className={`p-8 rounded-3xl bg-zinc-900/20 border border-zinc-800/60 hover:border-white/30 hover:-translate-y-1.5 transition-all duration-700 ease-out space-y-6 shadow-[0_15px_40px_rgba(0,0,0,0.3)] ${
+                advisoryInView
+                  ? "opacity-100 translate-y-0"
+                  : "opacity-0 translate-y-10"
+              }`}
+            >
               <span className="font-mono text-xs text-zinc-500 uppercase tracking-widest block">
                 Direct Architectural Advisory
               </span>
@@ -312,7 +287,14 @@ function InquirySectionComponent() {
               </div>
             </div>
 
-            <div className="inq-advisory-card p-8 rounded-3xl bg-zinc-900/10 border border-zinc-800/40 hover:border-white/20 transition-all duration-500 space-y-4 shadow-[0_10px_30px_rgba(0,0,0,0.2)]">
+            <div
+              className={`p-8 rounded-3xl bg-zinc-900/10 border border-zinc-800/40 hover:border-white/20 transition-all duration-700 ease-out space-y-4 shadow-[0_10px_30px_rgba(0,0,0,0.2)] ${
+                advisoryInView
+                  ? "opacity-100 translate-y-0"
+                  : "opacity-0 translate-y-10"
+              }`}
+              style={{ transitionDelay: "150ms" }}
+            >
               <span className="font-mono text-[10px] text-zinc-500 uppercase tracking-[0.2em] block">
                 Site Walkthrough Protocol
               </span>

@@ -1,71 +1,28 @@
 "use client";
 
-import React, { useEffect, useRef, memo } from "react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
+import React, { memo } from "react";
+import { useInView } from "../../hooks/useInView";
 
 function PhilosophySectionComponent() {
-  const sectionRef = useRef<HTMLElement | null>(null);
-
-  useEffect(() => {
-    gsap.registerPlugin(ScrollTrigger);
-
-    const ctx = gsap.context(() => {
-      // Header Elements Reveal (Eyebrow, H2, Paragraph)
-      gsap.from(".ph-header > *", {
-        scrollTrigger: {
-          trigger: ".ph-header",
-          start: "top 85%",
-          toggleActions: "play none none none",
-        },
-        y: 40,
-        opacity: 0,
-        duration: 1.0,
-        stagger: 0.15,
-        ease: "power3.out",
-      });
-
-      // Architect Quote Card Reveal
-      gsap.from(".ph-quote", {
-        scrollTrigger: {
-          trigger: ".ph-quote",
-          start: "top 85%",
-          toggleActions: "play none none none",
-        },
-        y: 50,
-        opacity: 0,
-        scale: 0.98,
-        duration: 1.2,
-        ease: "power3.out",
-      });
-
-      // 3 Design Pillars Staggered Reveal
-      gsap.from(".ph-pillar", {
-        scrollTrigger: {
-          trigger: ".ph-pillars-grid",
-          start: "top 85%",
-          toggleActions: "play none none none",
-        },
-        y: 45,
-        opacity: 0,
-        duration: 1.0,
-        stagger: 0.16,
-        ease: "power3.out",
-      });
-    }, sectionRef);
-
-    return () => ctx.revert();
-  }, []);
+  const [headerRef, headerInView] = useInView<HTMLDivElement>({ threshold: 0.15 });
+  const [quoteRef, quoteInView] = useInView<HTMLDivElement>({ threshold: 0.15 });
+  const [pillarsRef, pillarsInView] = useInView<HTMLDivElement>({ threshold: 0.1 });
 
   return (
     <section
       id="philosophy"
-      ref={sectionRef}
       className="relative z-10 bg-zinc-950 px-6 sm:px-12 md:px-20 lg:px-28 py-32 sm:py-44 border-t border-zinc-900 overflow-hidden"
     >
       <div className="max-w-6xl mx-auto space-y-24">
         {/* Section Header */}
-        <div className="ph-header space-y-6 max-w-3xl">
+        <div
+          ref={headerRef}
+          className={`space-y-6 max-w-3xl transition-all duration-1000 ease-out ${
+            headerInView
+              ? "opacity-100 translate-y-0"
+              : "opacity-0 translate-y-10"
+          }`}
+        >
           <div className="flex items-center gap-3">
             <span className="w-2 h-2 rounded-full bg-white/60 animate-pulse" />
             <span className="font-mono text-xs text-zinc-400 uppercase tracking-[0.3em]">
@@ -86,7 +43,14 @@ function PhilosophySectionComponent() {
         </div>
 
         {/* Featured Architect Quote Banner */}
-        <div className="ph-quote relative p-8 sm:p-14 rounded-3xl bg-zinc-900/40 border border-zinc-800/80 backdrop-blur-md overflow-hidden hover:border-white/20 transition-all duration-500 before:absolute before:inset-x-0 before:top-0 before:h-[1px] before:bg-gradient-to-r before:from-transparent before:via-white/20 before:to-transparent shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
+        <div
+          ref={quoteRef}
+          className={`relative p-8 sm:p-14 rounded-3xl bg-zinc-900/40 border border-zinc-800/80 backdrop-blur-md overflow-hidden hover:border-white/20 transition-all duration-1000 ease-out shadow-[0_20px_50px_rgba(0,0,0,0.5)] before:absolute before:inset-x-0 before:top-0 before:h-[1px] before:bg-gradient-to-r before:from-transparent before:via-white/20 before:to-transparent ${
+            quoteInView
+              ? "opacity-100 translate-y-0 scale-100"
+              : "opacity-0 translate-y-12 scale-[0.98]"
+          }`}
+        >
           <div className="max-w-3xl space-y-6">
             <svg
               className="w-8 h-8 text-white/30"
@@ -115,8 +79,19 @@ function PhilosophySectionComponent() {
         </div>
 
         {/* 3 Core Design Pillars */}
-        <div className="ph-pillars-grid grid grid-cols-1 md:grid-cols-3 gap-8 pt-4">
-          <div className="ph-pillar p-8 rounded-2xl bg-zinc-900/20 border border-zinc-800/60 hover:border-white/30 hover:-translate-y-2 transition-all duration-500 space-y-4 shadow-[0_10px_30px_rgba(0,0,0,0.3)]">
+        <div
+          ref={pillarsRef}
+          className="grid grid-cols-1 md:grid-cols-3 gap-8 pt-4"
+        >
+          {/* Pillar I */}
+          <div
+            className={`p-8 rounded-2xl bg-zinc-900/20 border border-zinc-800/60 hover:border-white/30 hover:-translate-y-2 transition-all duration-700 ease-out space-y-4 shadow-[0_10px_30px_rgba(0,0,0,0.3)] ${
+              pillarsInView
+                ? "opacity-100 translate-y-0"
+                : "opacity-0 translate-y-12"
+            }`}
+            style={{ transitionDelay: "100ms" }}
+          >
             <span className="font-mono text-xs text-zinc-500 uppercase tracking-widest block">
               Pillar I
             </span>
@@ -130,7 +105,15 @@ function PhilosophySectionComponent() {
             </p>
           </div>
 
-          <div className="ph-pillar p-8 rounded-2xl bg-zinc-900/20 border border-zinc-800/60 hover:border-white/30 hover:-translate-y-2 transition-all duration-500 space-y-4 shadow-[0_10px_30px_rgba(0,0,0,0.3)]">
+          {/* Pillar II */}
+          <div
+            className={`p-8 rounded-2xl bg-zinc-900/20 border border-zinc-800/60 hover:border-white/30 hover:-translate-y-2 transition-all duration-700 ease-out space-y-4 shadow-[0_10px_30px_rgba(0,0,0,0.3)] ${
+              pillarsInView
+                ? "opacity-100 translate-y-0"
+                : "opacity-0 translate-y-12"
+            }`}
+            style={{ transitionDelay: "220ms" }}
+          >
             <span className="font-mono text-xs text-zinc-500 uppercase tracking-widest block">
               Pillar II
             </span>
@@ -144,7 +127,15 @@ function PhilosophySectionComponent() {
             </p>
           </div>
 
-          <div className="ph-pillar p-8 rounded-2xl bg-zinc-900/20 border border-zinc-800/60 hover:border-white/30 hover:-translate-y-2 transition-all duration-500 space-y-4 shadow-[0_10px_30px_rgba(0,0,0,0.3)]">
+          {/* Pillar III */}
+          <div
+            className={`p-8 rounded-2xl bg-zinc-900/20 border border-zinc-800/60 hover:border-white/30 hover:-translate-y-2 transition-all duration-700 ease-out space-y-4 shadow-[0_10px_30px_rgba(0,0,0,0.3)] ${
+              pillarsInView
+                ? "opacity-100 translate-y-0"
+                : "opacity-0 translate-y-12"
+            }`}
+            style={{ transitionDelay: "340ms" }}
+          >
             <span className="font-mono text-xs text-zinc-500 uppercase tracking-widest block">
               Pillar III
             </span>

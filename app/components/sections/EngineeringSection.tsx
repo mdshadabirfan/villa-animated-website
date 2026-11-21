@@ -1,11 +1,12 @@
 "use client";
 
-import React, { useEffect, useRef, memo } from "react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
+import React, { memo } from "react";
+import { useInView } from "../../hooks/useInView";
 
 function EngineeringSectionComponent() {
-  const sectionRef = useRef<HTMLElement | null>(null);
+  const [headerRef, headerInView] = useInView<HTMLDivElement>({ threshold: 0.15 });
+  const [metricsRef, metricsInView] = useInView<HTMLDivElement>({ threshold: 0.1 });
+  const [systemsRef, systemsInView] = useInView<HTMLDivElement>({ threshold: 0.08 });
 
   const metrics = [
     { value: "94%", label: "ENERGY AUTONOMY", detail: "Annual solar micro-grid yield" },
@@ -45,65 +46,21 @@ function EngineeringSectionComponent() {
     },
   ];
 
-  useEffect(() => {
-    gsap.registerPlugin(ScrollTrigger);
-
-    const ctx = gsap.context(() => {
-      // Header Reveal
-      gsap.from(".eng-header > *", {
-        scrollTrigger: {
-          trigger: ".eng-header",
-          start: "top 85%",
-          toggleActions: "play none none none",
-        },
-        y: 40,
-        opacity: 0,
-        duration: 1.0,
-        stagger: 0.15,
-        ease: "power3.out",
-      });
-
-      // Big Metrics Stagger
-      gsap.from(".eng-metric-item", {
-        scrollTrigger: {
-          trigger: ".eng-metrics-container",
-          start: "top 85%",
-          toggleActions: "play none none none",
-        },
-        y: 35,
-        opacity: 0,
-        duration: 0.9,
-        stagger: 0.12,
-        ease: "power3.out",
-      });
-
-      // 4 Systems Cards Stagger
-      gsap.from(".eng-system-card", {
-        scrollTrigger: {
-          trigger: ".eng-systems-grid",
-          start: "top 85%",
-          toggleActions: "play none none none",
-        },
-        y: 45,
-        opacity: 0,
-        duration: 1.0,
-        stagger: 0.15,
-        ease: "power3.out",
-      });
-    }, sectionRef);
-
-    return () => ctx.revert();
-  }, []);
-
   return (
     <section
       id="engineering"
-      ref={sectionRef}
       className="relative z-10 bg-black px-6 sm:px-12 md:px-20 lg:px-28 py-32 sm:py-44 border-t border-zinc-900 overflow-hidden"
     >
       <div className="max-w-6xl mx-auto space-y-28">
         {/* Section Header */}
-        <div className="eng-header space-y-6 max-w-3xl">
+        <div
+          ref={headerRef}
+          className={`space-y-6 max-w-3xl transition-all duration-1000 ease-out ${
+            headerInView
+              ? "opacity-100 translate-y-0"
+              : "opacity-0 translate-y-10"
+          }`}
+        >
           <div className="flex items-center gap-3">
             <span className="w-2 h-2 rounded-full bg-white/60 animate-pulse" />
             <span className="font-mono text-xs text-zinc-400 uppercase tracking-[0.3em]">
@@ -122,9 +79,20 @@ function EngineeringSectionComponent() {
         </div>
 
         {/* Big Metrics Grid */}
-        <div className="eng-metrics-container grid grid-cols-2 lg:grid-cols-4 gap-6 p-8 sm:p-12 rounded-3xl bg-zinc-950/80 border border-zinc-800/80 font-mono shadow-[0_15px_40px_rgba(0,0,0,0.5)]">
+        <div
+          ref={metricsRef}
+          className="grid grid-cols-2 lg:grid-cols-4 gap-6 p-8 sm:p-12 rounded-3xl bg-zinc-950/80 border border-zinc-800/80 font-mono shadow-[0_15px_40px_rgba(0,0,0,0.5)]"
+        >
           {metrics.map((m, i) => (
-            <div key={i} className="eng-metric-item space-y-2">
+            <div
+              key={i}
+              className={`space-y-2 transition-all duration-700 ease-out ${
+                metricsInView
+                  ? "opacity-100 translate-y-0"
+                  : "opacity-0 translate-y-8"
+              }`}
+              style={{ transitionDelay: `${i * 100}ms` }}
+            >
               <span className="text-3xl sm:text-5xl font-light text-white tracking-tight block">
                 {m.value}
               </span>
@@ -139,11 +107,19 @@ function EngineeringSectionComponent() {
         </div>
 
         {/* 4 Systems Grid */}
-        <div className="eng-systems-grid grid grid-cols-1 md:grid-cols-2 gap-8">
-          {systems.map((sys) => (
+        <div
+          ref={systemsRef}
+          className="grid grid-cols-1 md:grid-cols-2 gap-8"
+        >
+          {systems.map((sys, idx) => (
             <div
               key={sys.code}
-              className="eng-system-card p-8 sm:p-10 rounded-3xl bg-zinc-900/30 border border-zinc-800/80 hover:border-white/30 hover:-translate-y-2 transition-all duration-500 flex flex-col justify-between space-y-6 shadow-[0_15px_40px_rgba(0,0,0,0.4)]"
+              className={`p-8 sm:p-10 rounded-3xl bg-zinc-900/30 border border-zinc-800/80 hover:border-white/30 hover:-translate-y-2 transition-all duration-700 ease-out flex flex-col justify-between space-y-6 shadow-[0_15px_40px_rgba(0,0,0,0.4)] ${
+                systemsInView
+                  ? "opacity-100 translate-y-0"
+                  : "opacity-0 translate-y-12"
+              }`}
+              style={{ transitionDelay: `${idx * 120}ms` }}
             >
               <div className="space-y-4">
                 <div className="flex items-center justify-between border-b border-zinc-800 pb-3">
@@ -163,9 +139,9 @@ function EngineeringSectionComponent() {
               </div>
 
               <div className="pt-4 border-t border-zinc-800/60 flex flex-wrap gap-2">
-                {sys.specs.map((s, idx) => (
+                {sys.specs.map((s, specIdx) => (
                   <span
-                    key={idx}
+                    key={specIdx}
                     className="px-3 py-1 rounded-full bg-white/[0.04] border border-white/10 text-[10px] font-mono text-zinc-300 hover:border-white/30 transition-colors"
                   >
                     {s}
