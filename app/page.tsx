@@ -45,13 +45,13 @@ export default function Home() {
   const scrollBtnRef = useRef<ScrollProgressButtonRef | null>(null);
   const currentFrameRef = useRef<number>(1);
 
-  // Initialize Lenis smooth scroll hook with GSAP ticker sync
+  // Initialize Lenis smooth scroll hook with GSAP ticker sync & fluid momentum damping
   const { lenis } = useLenis({
-    duration: 1.4,
-    easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+    lerp: 0.065, // Pure fluid physics damping momentum (eliminates abrupt stopping)
     smoothWheel: true,
-    wheelMultiplier: 0.75,
-    touchMultiplier: 1.1,
+    syncTouch: true,
+    wheelMultiplier: 1.0,
+    touchMultiplier: 1.2,
     syncScrollTrigger: true,
   });
 
@@ -133,50 +133,67 @@ export default function Home() {
     };
   }, [lenis]);
 
-  // Setup GSAP ScrollTrigger for strict 60 FPS Apple-style pinned scrubbing
+  // Setup GSAP ScrollTrigger for strict 60 FPS Apple-style pinned scrubbing with smooth momentum
   useEffect(() => {
     gsap.registerPlugin(ScrollTrigger);
 
     const pinTarget = pinnedSectionRef.current;
     if (!pinTarget) return;
 
+    // Smooth frame playhead proxy object
+    const playhead = { frame: currentFrameRef.current || 1 };
+
+    // GSAP tween scrubbing the frame from 1 to TOTAL_FRAMES
+    const tween = gsap.fromTo(
+      playhead,
+      { frame: 1 },
+      {
+        frame: TOTAL_FRAMES,
+        ease: "none",
+        paused: true,
+        onUpdate: () => {
+          const frameIndex = Math.min(
+            TOTAL_FRAMES,
+            Math.max(1, Math.round(playhead.frame))
+          );
+          const progress = (frameIndex - 1) / (TOTAL_FRAMES - 1);
+
+          // 1. Direct 60 FPS imperative UI updates (ZERO React virtual DOM re-renders during scroll)
+          navbarRef.current?.updateProgress(progress, frameIndex);
+          interiorTimelineRef.current?.updateProgress(progress, frameIndex);
+          floatingNavRef.current?.updateProgress(progress, frameIndex);
+
+          if (scrollProgressTrackRef.current) {
+            scrollProgressTrackRef.current.style.transform = `scaleX(${progress})`;
+          }
+
+          // 2. STRICT REDRAW CHECK: Canvas redraws ONLY when the calculated frame changes
+          if (frameIndex !== currentFrameRef.current) {
+            currentFrameRef.current = frameIndex;
+            canvasRef.current?.renderFrameOnScroll(frameIndex);
+          }
+        },
+      }
+    );
+
+    // ScrollTrigger with smooth scrub momentum:
+    // scrub: 0.8 gives 0.8s of silky fluid catch-up momentum
+    // When the mouse wheel is released, the video glides with natural inertia to a graceful stop
     const st = ScrollTrigger.create({
       trigger: pinTarget,
       start: "top top",
       end: `+=${SCROLL_DISTANCE}`,
       pin: true,
-      scrub: true, // 1:1 direct synchronization with smooth scroll without lag
-      onUpdate: (self) => {
-        const progress = Math.max(0, Math.min(1, self.progress));
-
-        // Map progress (0 to 1) directly to frame sequence (1 to TOTAL_FRAMES)
-        const frameIndex = Math.min(
-          TOTAL_FRAMES,
-          Math.max(1, Math.floor(progress * (TOTAL_FRAMES - 1)) + 1)
-        );
-
-        // 1. Direct 60 FPS imperative UI updates (ZERO React virtual DOM re-renders during scroll)
-        navbarRef.current?.updateProgress(progress, frameIndex);
-        interiorTimelineRef.current?.updateProgress(progress, frameIndex);
-        floatingNavRef.current?.updateProgress(progress, frameIndex);
-
-        if (scrollProgressTrackRef.current) {
-          scrollProgressTrackRef.current.style.transform = `scaleX(${progress})`;
-        }
-
-        // 2. STRICT REDRAW CHECK: Canvas redraws ONLY when the calculated frame changes
-        if (frameIndex !== currentFrameRef.current) {
-          currentFrameRef.current = frameIndex;
-          canvasRef.current?.renderFrameOnScroll(frameIndex);
-        }
-      },
+      animation: tween,
+      scrub: 0.8,
     });
 
     ScrollTrigger.refresh();
 
-    // Comprehensive lifecycle cleanup: kill triggers, remove listeners, prevent memory leaks
+    // Comprehensive lifecycle cleanup: kill triggers, kill tween, prevent memory leaks
     return () => {
       st.kill();
+      tween.kill();
       ScrollTrigger.getAll().forEach((trigger) => {
         if (trigger.vars.trigger === pinTarget) {
           trigger.kill();

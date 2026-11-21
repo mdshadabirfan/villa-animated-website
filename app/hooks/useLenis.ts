@@ -7,13 +7,17 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 export interface UseLenisOptions {
   /**
+   * Linear interpolation (lerp) intensity (between 0 and 1).
+   * Default: 0.07 (smooth physical deceleration)
+   */
+  lerp?: number;
+  /**
    * Duration of the smooth scroll animation in seconds.
-   * Default: 1.2
+   * Only used if explicitly provided; otherwise lerp physics is used.
    */
   duration?: number;
   /**
-   * Custom easing function.
-   * Default: exponential deceleration curve
+   * Custom easing function for duration-based animation.
    */
   easing?: (t: number) => number;
   /**
@@ -32,13 +36,18 @@ export interface UseLenisOptions {
    */
   smoothWheel?: boolean;
   /**
+   * Mimic touch device scroll while allowing smooth momentum.
+   * Default: true
+   */
+  syncTouch?: boolean;
+  /**
    * Multiplier for mouse wheel scroll distance.
    * Default: 1.0
    */
   wheelMultiplier?: number;
   /**
    * Multiplier for touch swipe gestures.
-   * Default: 1.5
+   * Default: 1.2
    */
   touchMultiplier?: number;
   /**
@@ -91,13 +100,15 @@ export function useLenis(options: UseLenisOptions = {}): UseLenisReturn {
   useEffect(() => {
     const currentOpts = optionsRef.current;
     const {
-      duration = 1.2,
-      easing = (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      duration,
+      easing,
+      lerp = 0.07,
       orientation = "vertical",
       gestureOrientation = "vertical",
       smoothWheel = true,
+      syncTouch = true,
       wheelMultiplier = 1.0,
-      touchMultiplier = 1.5,
+      touchMultiplier = 1.2,
       syncScrollTrigger = true,
       autoStart = true,
     } = currentOpts;
@@ -107,13 +118,13 @@ export function useLenis(options: UseLenisOptions = {}): UseLenisReturn {
       gsap.registerPlugin(ScrollTrigger);
     }
 
-    // Instantiate Lenis
+    // Instantiate Lenis: use physics-based lerp damping unless an explicit duration is requested
     const lenisInstance = new Lenis({
-      duration,
-      easing,
+      ...(duration !== undefined ? { duration, easing } : { lerp }),
       orientation,
       gestureOrientation,
       smoothWheel,
+      syncTouch,
       wheelMultiplier,
       touchMultiplier,
       autoRaf: false, // Driven via GSAP ticker
