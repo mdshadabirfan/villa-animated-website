@@ -1,26 +1,160 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --background: #000000;
+  --foreground: #ededed;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+  overflow-x: hidden;
+  transition: background-color 0.4s ease, color 0.4s ease;
+}
+
+/* Lenis Smooth Scrolling Core CSS */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+
+.lenis:not(.lenis-autoToggle).lenis-stopped {
+  overflow: clip;
+}
+
+.lenis [data-lenis-prevent],
+.lenis [data-lenis-prevent-wheel],
+.lenis [data-lenis-prevent-touch],
+.lenis [data-lenis-prevent-vertical],
+.lenis [data-lenis-prevent-horizontal] {
+  overscroll-behavior: contain;
+}
+
+.lenis.lenis-smooth iframe {
+  pointer-events: none;
+}
+
+/* =========================================================================
+   Architectural Light Theme (Alabaster / Warm Travertine Gallery Palette)
+   ========================================================================= */
+@layer base {
+  html.light {
+    --background: #f7f6f2;
+    --foreground: #141413;
+    color-scheme: light;
+  }
+
+  html.light body,
+  html.light main {
+    background-color: #f7f6f2 !important;
+    color: #141413 !important;
+  }
+
+  /* Sections Backgrounds & Borders in Light Mode */
+  html.light #philosophy,
+  html.light #materiality,
+  html.light #inquire {
+    background-color: #f2f1ec !important;
+    border-color: rgba(0, 0, 0, 0.08) !important;
+  }
+
+  html.light #spaces,
+  html.light #engineering,
+  html.light footer {
+    background-color: #f7f6f2 !important;
+    border-color: rgba(0, 0, 0, 0.08) !important;
+  }
+
+  /* Typography in Light Mode */
+  html.light h2,
+  html.light h3,
+  html.light h4 {
+    color: #141413 !important;
+  }
+
+  html.light p {
+    color: #4a4843 !important;
+  }
+
+  html.light .text-white {
+    color: #141413 !important;
+  }
+
+  html.light .text-zinc-200,
+  html.light .text-zinc-300 {
+    color: #2b2a27 !important;
+  }
+
+  html.light .text-zinc-400 {
+    color: #5c5a54 !important;
+  }
+
+  html.light .text-zinc-500 {
+    color: #7a7770 !important;
+  }
+
+  /* Cards & Surface Containers */
+  html.light .bg-zinc-950,
+  html.light .bg-zinc-900,
+  html.light .bg-zinc-900\/40,
+  html.light .bg-zinc-900\/30,
+  html.light .bg-zinc-900\/20,
+  html.light .bg-zinc-900\/10,
+  html.light .bg-zinc-950\/80 {
+    background-color: #ffffff !important;
+    border-color: rgba(0, 0, 0, 0.08) !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04) !important;
+  }
+
+  /* Floating Bars and Headers */
+  html.light .bg-black\/65,
+  html.light .bg-black\/60,
+  html.light .bg-black\/40 {
+    background-color: rgba(247, 246, 242, 0.85) !important;
+    border-color: rgba(0, 0, 0, 0.1) !important;
+  }
+
+  html.light .border-zinc-800,
+  html.light .border-zinc-800\/80,
+  html.light .border-zinc-800\/70,
+  html.light .border-zinc-800\/60,
+  html.light .border-zinc-800\/40,
+  html.light .border-zinc-900,
+  html.light .border-white\/10,
+  html.light .border-white\/15,
+  html.light .border-white\/20 {
+    border-color: rgba(0, 0, 0, 0.09) !important;
+  }
+
+  /* Badges */
+  html.light .bg-white\/\[0\.04\] {
+    background-color: rgba(0, 0, 0, 0.05) !important;
+    border-color: rgba(0, 0, 0, 0.1) !important;
+    color: #3b3935 !important;
+  }
+
+  /* Form inputs in Light Mode */
+  html.light input,
+  html.light select,
+  html.light textarea {
+    background-color: #ffffff !important;
+    border-color: rgba(0, 0, 0, 0.15) !important;
+    color: #141413 !important;
+  }
+
+  html.light input::placeholder,
+  html.light textarea::placeholder {
+    color: #8c8982 !important;
+  }
+
+  /* Primary CTA Button Inversion */
+  html.light form button[type="submit"] {
+    background-color: #141413 !important;
+    color: #ffffff !important;
+  }
+
+  html.light form button[type="submit"]:hover {
+    background-color: #2b2a27 !important;
+  }
 }
