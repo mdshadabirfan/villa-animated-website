@@ -1,8 +1,11 @@
 "use client";
 
-import React, { useState, memo } from "react";
+import React, { useState, useEffect, useRef, memo } from "react";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 function InquirySectionComponent() {
+  const sectionRef = useRef<HTMLElement | null>(null);
   const [submitted, setSubmitted] = useState<boolean>(false);
   const [formData, setFormData] = useState({
     fullName: "",
@@ -13,6 +16,55 @@ function InquirySectionComponent() {
     message: "",
   });
 
+  useEffect(() => {
+    gsap.registerPlugin(ScrollTrigger);
+
+    const ctx = gsap.context(() => {
+      // Header Reveal
+      gsap.from(".inq-header > *", {
+        scrollTrigger: {
+          trigger: ".inq-header",
+          start: "top 85%",
+          toggleActions: "play none none none",
+        },
+        y: 40,
+        opacity: 0,
+        duration: 1.0,
+        stagger: 0.15,
+        ease: "power3.out",
+      });
+
+      // Left Form Container Reveal
+      gsap.from(".inq-form-container", {
+        scrollTrigger: {
+          trigger: ".inq-columns-container",
+          start: "top 85%",
+          toggleActions: "play none none none",
+        },
+        y: 45,
+        opacity: 0,
+        duration: 1.1,
+        ease: "power3.out",
+      });
+
+      // Right Advisory Cards Reveal
+      gsap.from(".inq-advisory-card", {
+        scrollTrigger: {
+          trigger: ".inq-columns-container",
+          start: "top 85%",
+          toggleActions: "play none none none",
+        },
+        y: 45,
+        opacity: 0,
+        duration: 1.1,
+        stagger: 0.16,
+        ease: "power3.out",
+      });
+    }, sectionRef);
+
+    return () => ctx.revert();
+  }, []);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitted(true);
@@ -21,13 +73,14 @@ function InquirySectionComponent() {
   return (
     <section
       id="inquire"
-      className="relative z-10 bg-zinc-950 px-6 sm:px-12 md:px-20 lg:px-28 py-32 sm:py-44 border-t border-zinc-900"
+      ref={sectionRef}
+      className="relative z-10 bg-zinc-950 px-6 sm:px-12 md:px-20 lg:px-28 py-32 sm:py-44 border-t border-zinc-900 overflow-hidden"
     >
       <div className="max-w-6xl mx-auto space-y-24">
         {/* Section Header */}
-        <div className="space-y-6 max-w-3xl">
+        <div className="inq-header space-y-6 max-w-3xl">
           <div className="flex items-center gap-3">
-            <span className="w-2 h-2 rounded-full bg-white/60" />
+            <span className="w-2 h-2 rounded-full bg-white/60 animate-pulse" />
             <span className="font-mono text-xs text-zinc-400 uppercase tracking-[0.3em]">
               05 / Private Acquisition & Advisory
             </span>
@@ -46,9 +99,9 @@ function InquirySectionComponent() {
         </div>
 
         {/* 2-Column: Form & Advisory Details */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-start">
+        <div className="inq-columns-container grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-start">
           {/* Left Column: Interactive Form */}
-          <div className="lg:col-span-7 p-8 sm:p-12 rounded-3xl bg-zinc-900/40 border border-zinc-800/80 backdrop-blur-xl">
+          <div className="inq-form-container lg:col-span-7 p-8 sm:p-12 rounded-3xl bg-zinc-900/40 border border-zinc-800/80 backdrop-blur-xl shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
             {submitted ? (
               <div className="py-16 text-center space-y-5">
                 <div className="w-12 h-12 rounded-full bg-white/10 border border-white/20 flex items-center justify-center mx-auto text-white">
@@ -76,7 +129,7 @@ function InquirySectionComponent() {
                 </p>
                 <button
                   onClick={() => setSubmitted(false)}
-                  className="mt-6 text-xs font-mono uppercase tracking-widest text-zinc-400 hover:text-white transition-colors underline underline-offset-4"
+                  className="mt-6 text-xs font-mono uppercase tracking-widest text-zinc-400 hover:text-white transition-colors underline underline-offset-4 cursor-pointer"
                 >
                   Send Another Inquiry
                 </button>
@@ -184,7 +237,7 @@ function InquirySectionComponent() {
                     onChange={(e) =>
                       setFormData({ ...formData, representation: e.target.value })
                     }
-                    className="w-full px-4 py-3 rounded-xl bg-black/60 border border-zinc-800 text-white font-light text-sm focus:outline-none focus:border-white/40 transition-colors"
+                    className="w-full px-4 py-3 rounded-xl bg-black/60 border border-zinc-800 text-white font-light text-sm focus:outline-none focus:border-white/40 transition-colors cursor-pointer"
                   >
                     <option value="Principal">Direct Principal / Buyer</option>
                     <option value="FamilyOffice">Family Office Executive</option>
@@ -215,7 +268,7 @@ function InquirySectionComponent() {
 
                 <button
                   type="submit"
-                  className="w-full py-4 rounded-xl bg-white text-black hover:bg-zinc-200 font-mono text-xs tracking-[0.2em] uppercase font-semibold transition-all duration-300 shadow-[0_0_25px_rgba(255,255,255,0.2)] cursor-pointer"
+                  className="w-full py-4 rounded-xl bg-white text-black hover:bg-zinc-200 font-mono text-xs tracking-[0.2em] uppercase font-semibold transition-all duration-300 shadow-[0_0_25px_rgba(255,255,255,0.2)] hover:shadow-[0_0_35px_rgba(255,255,255,0.4)] cursor-pointer hover:scale-[1.01] active:scale-[0.99]"
                 >
                   Transmit Confidential Request
                 </button>
@@ -224,8 +277,8 @@ function InquirySectionComponent() {
           </div>
 
           {/* Right Column: Advisory Details */}
-          <div className="lg:col-span-5 space-y-10">
-            <div className="p-8 rounded-3xl bg-zinc-900/20 border border-zinc-800/60 space-y-6">
+          <div className="lg:col-span-5 space-y-8">
+            <div className="inq-advisory-card p-8 rounded-3xl bg-zinc-900/20 border border-zinc-800/60 hover:border-white/30 hover:-translate-y-1.5 transition-all duration-500 space-y-6 shadow-[0_15px_40px_rgba(0,0,0,0.3)]">
               <span className="font-mono text-xs text-zinc-500 uppercase tracking-widest block">
                 Direct Architectural Advisory
               </span>
@@ -254,12 +307,12 @@ function InquirySectionComponent() {
                 </div>
                 <div className="flex items-center justify-between text-zinc-400">
                   <span className="text-zinc-500 uppercase">Encryption</span>
-                  <span className="text-emerald-400">PGP Key Verified</span>
+                  <span className="text-emerald-400 font-medium">PGP Key Verified</span>
                 </div>
               </div>
             </div>
 
-            <div className="p-8 rounded-3xl bg-zinc-900/10 border border-zinc-800/40 space-y-4">
+            <div className="inq-advisory-card p-8 rounded-3xl bg-zinc-900/10 border border-zinc-800/40 hover:border-white/20 transition-all duration-500 space-y-4 shadow-[0_10px_30px_rgba(0,0,0,0.2)]">
               <span className="font-mono text-[10px] text-zinc-500 uppercase tracking-[0.2em] block">
                 Site Walkthrough Protocol
               </span>

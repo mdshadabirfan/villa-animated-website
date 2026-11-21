@@ -1,6 +1,8 @@
 "use client";
 
-import React, { memo } from "react";
+import React, { useEffect, useRef, memo } from "react";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { INTERIOR_SPACES } from "../InteriorTimeline";
 
 export interface SpatialProgramSectionProps {
@@ -10,6 +12,8 @@ export interface SpatialProgramSectionProps {
 function SpatialProgramSectionComponent({
   onNavigateToSpace,
 }: SpatialProgramSectionProps) {
+  const sectionRef = useRef<HTMLElement | null>(null);
+
   const levels = [
     {
       level: "LEVEL 03",
@@ -55,16 +59,80 @@ function SpatialProgramSectionComponent({
     },
   ];
 
+  useEffect(() => {
+    gsap.registerPlugin(ScrollTrigger);
+
+    const ctx = gsap.context(() => {
+      // Header Reveal
+      gsap.from(".sp-header > *", {
+        scrollTrigger: {
+          trigger: ".sp-header",
+          start: "top 85%",
+          toggleActions: "play none none none",
+        },
+        y: 40,
+        opacity: 0,
+        duration: 1.0,
+        stagger: 0.15,
+        ease: "power3.out",
+      });
+
+      // 3 Architectural Tiers Stagger
+      gsap.from(".sp-level-card", {
+        scrollTrigger: {
+          trigger: ".sp-levels-grid",
+          start: "top 85%",
+          toggleActions: "play none none none",
+        },
+        y: 50,
+        opacity: 0,
+        duration: 1.1,
+        stagger: 0.18,
+        ease: "power3.out",
+      });
+
+      // 6 Sequenced Rooms Section Header
+      gsap.from(".sp-episodes-header", {
+        scrollTrigger: {
+          trigger: ".sp-episodes-header",
+          start: "top 85%",
+          toggleActions: "play none none none",
+        },
+        y: 35,
+        opacity: 0,
+        duration: 0.9,
+        ease: "power3.out",
+      });
+
+      // 6 Sequenced Rooms Cards Stagger
+      gsap.from(".sp-room-card", {
+        scrollTrigger: {
+          trigger: ".sp-rooms-grid",
+          start: "top 85%",
+          toggleActions: "play none none none",
+        },
+        y: 40,
+        opacity: 0,
+        duration: 0.9,
+        stagger: 0.1,
+        ease: "power3.out",
+      });
+    }, sectionRef);
+
+    return () => ctx.revert();
+  }, []);
+
   return (
     <section
       id="spaces"
-      className="relative z-10 bg-black px-6 sm:px-12 md:px-20 lg:px-28 py-32 sm:py-44 border-t border-zinc-900"
+      ref={sectionRef}
+      className="relative z-10 bg-black px-6 sm:px-12 md:px-20 lg:px-28 py-32 sm:py-44 border-t border-zinc-900 overflow-hidden"
     >
       <div className="max-w-6xl mx-auto space-y-28">
         {/* Section Header */}
-        <div className="space-y-6 max-w-3xl">
+        <div className="sp-header space-y-6 max-w-3xl">
           <div className="flex items-center gap-3">
-            <span className="w-2 h-2 rounded-full bg-white/60" />
+            <span className="w-2 h-2 rounded-full bg-white/60 animate-pulse" />
             <span className="font-mono text-xs text-zinc-400 uppercase tracking-[0.3em]">
               02 / Spatial Program & Blueprints
             </span>
@@ -82,11 +150,11 @@ function SpatialProgramSectionComponent({
         </div>
 
         {/* 3 Architectural Tiers */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="sp-levels-grid grid grid-cols-1 lg:grid-cols-3 gap-8">
           {levels.map((item, idx) => (
             <div
               key={idx}
-              className="p-8 sm:p-10 rounded-3xl bg-zinc-950/80 border border-zinc-800/80 flex flex-col justify-between space-y-8"
+              className="sp-level-card p-8 sm:p-10 rounded-3xl bg-zinc-950/80 border border-zinc-800/80 hover:border-white/30 hover:-translate-y-2 transition-all duration-500 flex flex-col justify-between space-y-8 shadow-[0_15px_40px_rgba(0,0,0,0.4)]"
             >
               <div className="space-y-6">
                 <div className="flex items-center justify-between border-b border-zinc-800/80 pb-4">
@@ -129,7 +197,7 @@ function SpatialProgramSectionComponent({
 
         {/* Detailed 6 Sequence Spaces Cards */}
         <div className="space-y-8 pt-8">
-          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-zinc-800 pb-6">
+          <div className="sp-episodes-header flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-zinc-800 pb-6">
             <div>
               <span className="font-mono text-xs text-zinc-500 uppercase tracking-widest">
                 Curated Sequence
@@ -143,7 +211,7 @@ function SpatialProgramSectionComponent({
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="sp-rooms-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {INTERIOR_SPACES.map((space) => {
               const targetFrame = Math.round(
                 (space.startFrame + space.endFrame) / 2
@@ -152,7 +220,7 @@ function SpatialProgramSectionComponent({
               return (
                 <div
                   key={space.id}
-                  className="group relative p-7 rounded-2xl bg-zinc-900/30 border border-zinc-800/60 hover:border-white/30 transition-all duration-300 flex flex-col justify-between space-y-6"
+                  className="sp-room-card group relative p-7 rounded-2xl bg-zinc-900/30 border border-zinc-800/60 hover:border-white/30 hover:-translate-y-1.5 transition-all duration-500 flex flex-col justify-between space-y-6 shadow-[0_10px_30px_rgba(0,0,0,0.3)]"
                 >
                   <div className="space-y-3">
                     <div className="flex items-center justify-between text-[11px] font-mono text-zinc-500">
@@ -188,7 +256,7 @@ function SpatialProgramSectionComponent({
                       className="w-full flex items-center justify-between text-xs font-mono text-zinc-400 hover:text-white pt-2 border-t border-white/[0.06] transition-colors cursor-pointer group-hover:text-white"
                     >
                       <span>Jump to 3D Sequence</span>
-                      <span className="text-zinc-600 group-hover:text-white transition-colors">
+                      <span className="text-zinc-500 group-hover:text-white group-hover:translate-x-1 transition-all duration-300">
                         →
                       </span>
                     </button>
@@ -205,4 +273,3 @@ function SpatialProgramSectionComponent({
 
 export const SpatialProgramSection = memo(SpatialProgramSectionComponent);
 export default SpatialProgramSection;
-

@@ -1,8 +1,12 @@
 "use client";
 
-import React, { memo } from "react";
+import React, { useEffect, useRef, memo } from "react";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 function EngineeringSectionComponent() {
+  const sectionRef = useRef<HTMLElement | null>(null);
+
   const metrics = [
     { value: "94%", label: "ENERGY AUTONOMY", detail: "Annual solar micro-grid yield" },
     { value: "96 kWh", label: "STORAGE CAPACITY", detail: "Subterranean LFP battery reserve" },
@@ -41,16 +45,67 @@ function EngineeringSectionComponent() {
     },
   ];
 
+  useEffect(() => {
+    gsap.registerPlugin(ScrollTrigger);
+
+    const ctx = gsap.context(() => {
+      // Header Reveal
+      gsap.from(".eng-header > *", {
+        scrollTrigger: {
+          trigger: ".eng-header",
+          start: "top 85%",
+          toggleActions: "play none none none",
+        },
+        y: 40,
+        opacity: 0,
+        duration: 1.0,
+        stagger: 0.15,
+        ease: "power3.out",
+      });
+
+      // Big Metrics Stagger
+      gsap.from(".eng-metric-item", {
+        scrollTrigger: {
+          trigger: ".eng-metrics-container",
+          start: "top 85%",
+          toggleActions: "play none none none",
+        },
+        y: 35,
+        opacity: 0,
+        duration: 0.9,
+        stagger: 0.12,
+        ease: "power3.out",
+      });
+
+      // 4 Systems Cards Stagger
+      gsap.from(".eng-system-card", {
+        scrollTrigger: {
+          trigger: ".eng-systems-grid",
+          start: "top 85%",
+          toggleActions: "play none none none",
+        },
+        y: 45,
+        opacity: 0,
+        duration: 1.0,
+        stagger: 0.15,
+        ease: "power3.out",
+      });
+    }, sectionRef);
+
+    return () => ctx.revert();
+  }, []);
+
   return (
     <section
       id="engineering"
-      className="relative z-10 bg-black px-6 sm:px-12 md:px-20 lg:px-28 py-32 sm:py-44 border-t border-zinc-900"
+      ref={sectionRef}
+      className="relative z-10 bg-black px-6 sm:px-12 md:px-20 lg:px-28 py-32 sm:py-44 border-t border-zinc-900 overflow-hidden"
     >
       <div className="max-w-6xl mx-auto space-y-28">
         {/* Section Header */}
-        <div className="space-y-6 max-w-3xl">
+        <div className="eng-header space-y-6 max-w-3xl">
           <div className="flex items-center gap-3">
-            <span className="w-2 h-2 rounded-full bg-white/60" />
+            <span className="w-2 h-2 rounded-full bg-white/60 animate-pulse" />
             <span className="font-mono text-xs text-zinc-400 uppercase tracking-[0.3em]">
               04 / Climate Engineering & Infrastructure
             </span>
@@ -67,9 +122,9 @@ function EngineeringSectionComponent() {
         </div>
 
         {/* Big Metrics Grid */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 p-8 sm:p-12 rounded-3xl bg-zinc-950/80 border border-zinc-800/80 font-mono">
+        <div className="eng-metrics-container grid grid-cols-2 lg:grid-cols-4 gap-6 p-8 sm:p-12 rounded-3xl bg-zinc-950/80 border border-zinc-800/80 font-mono shadow-[0_15px_40px_rgba(0,0,0,0.5)]">
           {metrics.map((m, i) => (
-            <div key={i} className="space-y-2">
+            <div key={i} className="eng-metric-item space-y-2">
               <span className="text-3xl sm:text-5xl font-light text-white tracking-tight block">
                 {m.value}
               </span>
@@ -84,18 +139,18 @@ function EngineeringSectionComponent() {
         </div>
 
         {/* 4 Systems Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="eng-systems-grid grid grid-cols-1 md:grid-cols-2 gap-8">
           {systems.map((sys) => (
             <div
               key={sys.code}
-              className="p-8 sm:p-10 rounded-3xl bg-zinc-900/30 border border-zinc-800/80 flex flex-col justify-between space-y-6"
+              className="eng-system-card p-8 sm:p-10 rounded-3xl bg-zinc-900/30 border border-zinc-800/80 hover:border-white/30 hover:-translate-y-2 transition-all duration-500 flex flex-col justify-between space-y-6 shadow-[0_15px_40px_rgba(0,0,0,0.4)]"
             >
               <div className="space-y-4">
                 <div className="flex items-center justify-between border-b border-zinc-800 pb-3">
                   <span className="font-mono text-xs text-zinc-500 uppercase tracking-widest">
                     {sys.code}
                   </span>
-                  <span className="w-2 h-2 rounded-full bg-emerald-500/80" />
+                  <span className="w-2 h-2 rounded-full bg-emerald-400/90 shadow-[0_0_8px_rgba(52,211,153,0.8)] animate-pulse" />
                 </div>
 
                 <h3 className="text-2xl font-light text-white tracking-wide">
@@ -111,7 +166,7 @@ function EngineeringSectionComponent() {
                 {sys.specs.map((s, idx) => (
                   <span
                     key={idx}
-                    className="px-3 py-1 rounded-full bg-white/[0.04] border border-white/10 text-[10px] font-mono text-zinc-300"
+                    className="px-3 py-1 rounded-full bg-white/[0.04] border border-white/10 text-[10px] font-mono text-zinc-300 hover:border-white/30 transition-colors"
                   >
                     {s}
                   </span>
@@ -127,4 +182,3 @@ function EngineeringSectionComponent() {
 
 export const EngineeringSection = memo(EngineeringSectionComponent);
 export default EngineeringSection;
-

@@ -1,18 +1,73 @@
 "use client";
 
-import React, { memo } from "react";
+import React, { useEffect, useRef, memo } from "react";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 function PhilosophySectionComponent() {
+  const sectionRef = useRef<HTMLElement | null>(null);
+
+  useEffect(() => {
+    gsap.registerPlugin(ScrollTrigger);
+
+    const ctx = gsap.context(() => {
+      // Header Elements Reveal (Eyebrow, H2, Paragraph)
+      gsap.from(".ph-header > *", {
+        scrollTrigger: {
+          trigger: ".ph-header",
+          start: "top 85%",
+          toggleActions: "play none none none",
+        },
+        y: 40,
+        opacity: 0,
+        duration: 1.0,
+        stagger: 0.15,
+        ease: "power3.out",
+      });
+
+      // Architect Quote Card Reveal
+      gsap.from(".ph-quote", {
+        scrollTrigger: {
+          trigger: ".ph-quote",
+          start: "top 85%",
+          toggleActions: "play none none none",
+        },
+        y: 50,
+        opacity: 0,
+        scale: 0.98,
+        duration: 1.2,
+        ease: "power3.out",
+      });
+
+      // 3 Design Pillars Staggered Reveal
+      gsap.from(".ph-pillar", {
+        scrollTrigger: {
+          trigger: ".ph-pillars-grid",
+          start: "top 85%",
+          toggleActions: "play none none none",
+        },
+        y: 45,
+        opacity: 0,
+        duration: 1.0,
+        stagger: 0.16,
+        ease: "power3.out",
+      });
+    }, sectionRef);
+
+    return () => ctx.revert();
+  }, []);
+
   return (
     <section
       id="philosophy"
-      className="relative z-10 bg-zinc-950 px-6 sm:px-12 md:px-20 lg:px-28 py-32 sm:py-44 border-t border-zinc-900"
+      ref={sectionRef}
+      className="relative z-10 bg-zinc-950 px-6 sm:px-12 md:px-20 lg:px-28 py-32 sm:py-44 border-t border-zinc-900 overflow-hidden"
     >
       <div className="max-w-6xl mx-auto space-y-24">
         {/* Section Header */}
-        <div className="space-y-6 max-w-3xl">
+        <div className="ph-header space-y-6 max-w-3xl">
           <div className="flex items-center gap-3">
-            <span className="w-2 h-2 rounded-full bg-white/60" />
+            <span className="w-2 h-2 rounded-full bg-white/60 animate-pulse" />
             <span className="font-mono text-xs text-zinc-400 uppercase tracking-[0.3em]">
               01 / Architectural Monograph
             </span>
@@ -31,7 +86,7 @@ function PhilosophySectionComponent() {
         </div>
 
         {/* Featured Architect Quote Banner */}
-        <div className="relative p-8 sm:p-14 rounded-3xl bg-zinc-900/40 border border-zinc-800/80 backdrop-blur-md overflow-hidden before:absolute before:inset-x-0 before:top-0 before:h-[1px] before:bg-gradient-to-r before:from-transparent before:via-white/20 before:to-transparent">
+        <div className="ph-quote relative p-8 sm:p-14 rounded-3xl bg-zinc-900/40 border border-zinc-800/80 backdrop-blur-md overflow-hidden hover:border-white/20 transition-all duration-500 before:absolute before:inset-x-0 before:top-0 before:h-[1px] before:bg-gradient-to-r before:from-transparent before:via-white/20 before:to-transparent shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
           <div className="max-w-3xl space-y-6">
             <svg
               className="w-8 h-8 text-white/30"
@@ -60,9 +115,9 @@ function PhilosophySectionComponent() {
         </div>
 
         {/* 3 Core Design Pillars */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 pt-4">
-          <div className="p-8 rounded-2xl bg-zinc-900/20 border border-zinc-800/60 space-y-4">
-            <span className="font-mono text-xs text-zinc-500 uppercase tracking-widest">
+        <div className="ph-pillars-grid grid grid-cols-1 md:grid-cols-3 gap-8 pt-4">
+          <div className="ph-pillar p-8 rounded-2xl bg-zinc-900/20 border border-zinc-800/60 hover:border-white/30 hover:-translate-y-2 transition-all duration-500 space-y-4 shadow-[0_10px_30px_rgba(0,0,0,0.3)]">
+            <span className="font-mono text-xs text-zinc-500 uppercase tracking-widest block">
               Pillar I
             </span>
             <h3 className="text-xl font-medium text-white tracking-wide">
@@ -75,8 +130,8 @@ function PhilosophySectionComponent() {
             </p>
           </div>
 
-          <div className="p-8 rounded-2xl bg-zinc-900/20 border border-zinc-800/60 space-y-4">
-            <span className="font-mono text-xs text-zinc-500 uppercase tracking-widest">
+          <div className="ph-pillar p-8 rounded-2xl bg-zinc-900/20 border border-zinc-800/60 hover:border-white/30 hover:-translate-y-2 transition-all duration-500 space-y-4 shadow-[0_10px_30px_rgba(0,0,0,0.3)]">
+            <span className="font-mono text-xs text-zinc-500 uppercase tracking-widest block">
               Pillar II
             </span>
             <h3 className="text-xl font-medium text-white tracking-wide">
@@ -89,8 +144,8 @@ function PhilosophySectionComponent() {
             </p>
           </div>
 
-          <div className="p-8 rounded-2xl bg-zinc-900/20 border border-zinc-800/60 space-y-4">
-            <span className="font-mono text-xs text-zinc-500 uppercase tracking-widest">
+          <div className="ph-pillar p-8 rounded-2xl bg-zinc-900/20 border border-zinc-800/60 hover:border-white/30 hover:-translate-y-2 transition-all duration-500 space-y-4 shadow-[0_10px_30px_rgba(0,0,0,0.3)]">
+            <span className="font-mono text-xs text-zinc-500 uppercase tracking-widest block">
               Pillar III
             </span>
             <h3 className="text-xl font-medium text-white tracking-wide">
@@ -110,4 +165,3 @@ function PhilosophySectionComponent() {
 
 export const PhilosophySection = memo(PhilosophySectionComponent);
 export default PhilosophySection;
-

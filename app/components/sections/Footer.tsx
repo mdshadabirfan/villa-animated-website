@@ -1,12 +1,15 @@
 "use client";
 
-import React, { useEffect, useState, memo } from "react";
+import React, { useEffect, useState, useRef, memo } from "react";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 export interface FooterProps {
   onNavigateToSection?: (sectionId: string) => void;
 }
 
 function FooterComponent({ onNavigateToSection }: FooterProps) {
+  const footerRef = useRef<HTMLElement | null>(null);
   const [pacificTime, setPacificTime] = useState<string>("");
 
   useEffect(() => {
@@ -27,11 +30,62 @@ function FooterComponent({ onNavigateToSection }: FooterProps) {
     return () => clearInterval(interval);
   }, []);
 
+  useEffect(() => {
+    gsap.registerPlugin(ScrollTrigger);
+
+    const ctx = gsap.context(() => {
+      // Big Architectural Wordmark & Coordinates Reveal
+      gsap.from(".footer-header", {
+        scrollTrigger: {
+          trigger: ".footer-header",
+          start: "top 90%",
+          toggleActions: "play none none none",
+        },
+        y: 40,
+        opacity: 0,
+        duration: 1.1,
+        ease: "power3.out",
+      });
+
+      // 4 Directory Columns Staggered Reveal
+      gsap.from(".footer-col", {
+        scrollTrigger: {
+          trigger: ".footer-directory-grid",
+          start: "top 90%",
+          toggleActions: "play none none none",
+        },
+        y: 35,
+        opacity: 0,
+        duration: 0.9,
+        stagger: 0.12,
+        ease: "power3.out",
+      });
+
+      // Bottom Legal Bar
+      gsap.from(".footer-bottom", {
+        scrollTrigger: {
+          trigger: ".footer-bottom",
+          start: "top 96%",
+          toggleActions: "play none none none",
+        },
+        opacity: 0,
+        y: 20,
+        duration: 1.0,
+        ease: "power2.out",
+      });
+    }, footerRef);
+
+    return () => ctx.revert();
+  }, []);
+
   return (
-    <footer className="relative z-10 bg-black text-white px-6 sm:px-12 md:px-20 lg:px-28 pt-24 pb-16 border-t border-zinc-900">
+    <footer
+      ref={footerRef}
+      className="relative z-10 bg-black text-white px-6 sm:px-12 md:px-20 lg:px-28 pt-24 pb-16 border-t border-zinc-900 overflow-hidden"
+    >
       <div className="max-w-6xl mx-auto space-y-20">
         {/* Top: Large Architectural Wordmark & Coordinates */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 border-b border-zinc-800 pb-16">
+        <div className="footer-header flex flex-col md:flex-row md:items-end justify-between gap-8 border-b border-zinc-800 pb-16">
           <div className="space-y-3">
             <h2 className="text-4xl sm:text-6xl lg:text-7xl font-extralight tracking-[0.22em] text-white uppercase">
               Villa Horizon
@@ -63,9 +117,9 @@ function FooterComponent({ onNavigateToSection }: FooterProps) {
         </div>
 
         {/* 4-Column Directory */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-10 font-mono text-xs">
+        <div className="footer-directory-grid grid grid-cols-2 md:grid-cols-4 gap-10 font-mono text-xs">
           {/* Column 1: Monograph Directory */}
-          <div className="space-y-4">
+          <div className="footer-col space-y-4">
             <span className="text-zinc-500 uppercase tracking-widest block text-[10px]">
               01 · Monograph Index
             </span>
@@ -122,7 +176,7 @@ function FooterComponent({ onNavigateToSection }: FooterProps) {
           </div>
 
           {/* Column 2: Architectural Collaborators */}
-          <div className="space-y-4">
+          <div className="footer-col space-y-4">
             <span className="text-zinc-500 uppercase tracking-widest block text-[10px]">
               02 · Project Collaborators
             </span>
@@ -147,7 +201,7 @@ function FooterComponent({ onNavigateToSection }: FooterProps) {
           </div>
 
           {/* Column 3: Residence Facts */}
-          <div className="space-y-4">
+          <div className="footer-col space-y-4">
             <span className="text-zinc-500 uppercase tracking-widest block text-[10px]">
               03 · Structural Dossier
             </span>
@@ -174,7 +228,7 @@ function FooterComponent({ onNavigateToSection }: FooterProps) {
           </div>
 
           {/* Column 4: Private Desk & Back to Top */}
-          <div className="space-y-6 flex flex-col justify-between">
+          <div className="footer-col space-y-6 flex flex-col justify-between">
             <div className="space-y-3">
               <span className="text-zinc-500 uppercase tracking-widest block text-[10px]">
                 04 · Confidential Advisory
@@ -196,7 +250,7 @@ function FooterComponent({ onNavigateToSection }: FooterProps) {
         </div>
 
         {/* Bottom Legal & Copyright */}
-        <div className="pt-10 border-t border-zinc-900 flex flex-col sm:flex-row items-center justify-between gap-4 font-mono text-[10px] text-zinc-600">
+        <div className="footer-bottom pt-10 border-t border-zinc-900 flex flex-col sm:flex-row items-center justify-between gap-4 font-mono text-[10px] text-zinc-600">
           <p>© 2026 VILLA HORIZON. ALL ARCHITECTURAL RIGHTS RESERVED.</p>
           <div className="flex gap-6 uppercase tracking-wider">
             <span className="hover:text-zinc-400 transition-colors">Confidential Placement</span>
